@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Adaptive-Arith"
+version = "0.0.1"
+authors = [
+  { name="Alejandro Sánchez Rodríguez" },
+]
+description = "Adaptive Arithmetic coding."
+readme = "README.md"
+requires-python = ">=3.7"
+
+[tool.setuptools.packages.find]
+where = ["src"]

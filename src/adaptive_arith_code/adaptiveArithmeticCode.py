@@ -1,59 +1,8 @@
-from collections import OrderedDict
-
-
-def EOF():
-    return 256
-
-
-# Build a default table with 256 bits for image
-def build_default_FrequencyTable():
-    freqs = FrequencyTable()
-
-    for symbol in range(256):
-        freqs.add(symbol)
-
-    eof = EOF()
-    freqs.add(eof)
-
-    freqs.calculateProbabilities()
-    return freqs
-
-
-class FrequencyTable:
-    def __init__(self):
-        self.alphabet = []
-        self.frequencies = OrderedDict()
-        self.cumulative_ranges = {}
-        self.nsymbols = 0
-
-    def add(self, symbol):
-        if symbol in self.frequencies:
-            self.frequencies[symbol] += 1
-        else:
-            self.alphabet.append(symbol)
-            self.frequencies[symbol] = 1
-        self.nsymbols += 1
-
-    def updateFreqs(self, symbol):
-        self.frequencies[symbol] += 1
-        self.nsymbols += 1
-        self.calculateProbabilities()
-
-    def calculateProbabilities(self):
-        ranges = {}
-        accumulate = 0
-
-        for symbol in self.alphabet:
-            low = accumulate
-            high = accumulate + self.frequencies[symbol]
-            ranges[symbol] = (low, high)
-            accumulate = high
-
-        self.cumulative_ranges = ranges
+from FrequencyTable import FrequencyTable, build_default_FrequencyTable, EOF
 
 
 class ArithmeticCodding:
-    def __init__(self, precision=32):
+    def __init__(self, precision=32, eof_symbol=EOF()):
         self.precision = precision
         self.max_val = (1 << precision) - 1
         self.half = 1 << (precision - 1)
@@ -63,14 +12,24 @@ class ArithmeticCodding:
         self.low = 0
         self.pending = 0
 
+        self.eof_symbol = eof_symbol
+
+    # Copy the resultant bit of (1 - bit) for all pending bits
+    def _emit(self, bit, bits):
+        # set the first bit used (1 or 0)
+        bits.append(bit)
+        for _ in range(self.pending):
+            # if bit 1 then pending bits 0(1 - 1)
+            # if bit 0 then pending bits 1(1 - 0)
+            bits.append(1 - bit)
+        self.pending = 0
+
     def finish(self, bits):
         self.pending += 1
         if self.low < self.quarter:
-            bits.append(0)
-            bits.extend([1] * self.pending)
+            self._emit(0, bits)
         else:
-            bits.append(1)
-            bits.extend([0] * self.pending)
+            self._emit(1, bits)
 
     def encode_symbol(self, symbol, table, bits):
         total = table.nsymbols
@@ -83,13 +42,9 @@ class ArithmeticCodding:
 
         while True:
             if self.high < self.half:
-                bits.append(0)
-                bits.extend([1] * self.pending)
-                self.pending = 0
+                self._emit(0, bits)
             elif self.low >= self.half:
-                bits.append(1)
-                bits.extend([0] * self.pending)
-                self.pending = 0
+                self._emit(1, bits)
                 self.low -= self.half
                 self.high -= self.half
             elif self.low >= self.quarter and self.high < 3 * self.quarter:
@@ -117,7 +72,7 @@ class ArithmeticCodding:
 
             for s, (r_low, r_high) in table.cumulative_ranges.items():
                 if r_low <= value < r_high:
-                    if s == EOF():
+                    if s == self.eof_symbol:
                         return
                     result.append(s)
                     high = low + (range_width * r_high // total) - 1
@@ -145,11 +100,14 @@ class ArithmeticCodding:
                 high = (high << 1) | 1
                 code = (code << 1) | next(bit_iter, 0)
 
+                self.low = low
+                self.high = high
+
 
 # Helpers
 def _encode(message):
     table_enc = build_default_FrequencyTable()
-    coder = ArithmeticCodding(precision=16)
+    coder = ArithmeticCodding(precision=32)
 
     bits = []
 
@@ -166,7 +124,7 @@ def _encode(message):
 
 def _decode(bits):
     table_dec = build_default_FrequencyTable()
-    decoder = ArithmeticCodding(precision=16)
+    decoder = ArithmeticCodding(precision=32)
     result = []
     decoder.decode(bits, table_dec, result)
 

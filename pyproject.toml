@@ -8,7 +8,7 @@ version = "0.0.1"
 authors = [
   { name="Alejandro Sánchez Rodríguez" },
 ]
-description = "Adaptive Arithmetic coding."
+description = "Adaptive Arithmetic coding. with PPM model of k orders"
 readme = "README.md"
 requires-python = ">=3.7"
 

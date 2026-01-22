@@ -1,4 +1,7 @@
-from FrequencyTable import FrequencyTable, build_default_FrequencyTable, EOF
+try:
+    from FrequencyTable import FrequencyTable, build_default_FrequencyTable, EOF
+except ImportError:
+    from .FrequencyTable import FrequencyTable, build_default_FrequencyTable, EOF
 
 
 class ArithmeticCodding:

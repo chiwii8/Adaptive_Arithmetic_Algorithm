@@ -1,7 +1,11 @@
-from Ppmmodel import PPMModel
-from adaptiveArithmeticCode import ArithmeticCodding
-from FrequencyTable import EOF, ESC
-
+try:
+    from Ppmmodel import PPMModel
+    from adaptiveArithmeticCode import ArithmeticCodding
+    from FrequencyTable import EOF, ESC
+except ImportError:
+    from .Ppmmodel import PPMModel
+    from .adaptiveArithmeticCode import ArithmeticCodding
+    from .FrequencyTable import EOF, ESC
 
 class PPMCompressor:
     def __init__(self, model_order=1, eof_symbol=EOF(), escape_symbol=ESC()):

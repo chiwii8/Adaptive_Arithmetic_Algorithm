@@ -1,4 +1,7 @@
-from FrequencyTable import FrequencyTable, EOF, ESC
+try:
+    from FrequencyTable import FrequencyTable, EOF, ESC
+except ImportError:
+    from .FrequencyTable import FrequencyTable, EOF, ESC
 
 
 # Implementation of the Prediction Partial Matching

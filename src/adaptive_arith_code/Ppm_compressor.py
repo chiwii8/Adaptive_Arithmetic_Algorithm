@@ -131,13 +131,14 @@ class PPMDecompressor:
                     break
 
 
-# --- Test ---
-original = b"BANANA_BANANERA"
-ppmcompresor = PPMCompressor(model_order=2)
-ppmdecompresor = PPMDecompressor(model_order=2)
-bits = ppmcompresor.compress(original)
-decoded = ppmdecompresor.decompress(bits)
+if __name__ == "__main__":
+    # --- Test ---
+    original = b"BANANA_BANANERA"
+    ppmcompresor = PPMCompressor(model_order=2)
+    ppmdecompresor = PPMDecompressor(model_order=2)
+    bits = ppmcompresor.compress(original)
+    decoded = ppmdecompresor.decompress(bits)
 
-print(f"Original: {original.decode()}")
-print(f"Decodificado: {decoded.decode()}")
-print(f"Bits totales: {len(bits)}")
+    print(f"Original: {original.decode()}")
+    print(f"Decodificado: {decoded.decode()}")
+    print(f"Bits totales: {len(bits)}")
